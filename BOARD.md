@@ -5,7 +5,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 
 | id | packet                         | deps                              | status      | claim                        | verdict |
 |----|--------------------------------|-----------------------------------|-------------|------------------------------|---------|
-| P0 | Agent Zero                     | —                                 | BLOCKED     | codex / 2026-07-17 / 019f    | F001–F005 |
+| P0 | Agent Zero                     | —                                 | TODO        |                              |         |
 | S1 | DB layer & CAS rules           | P0                                | TODO        |                              |         |
 | S2 | Memory CRUD & dedup bands      | S1                                | TODO        |                              |         |
 | S3 | Scorer v0 + inject/prepare     | S2                                | TODO        |                              |         |

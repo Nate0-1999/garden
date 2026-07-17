@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v1.4. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v1.5. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -21,9 +21,10 @@ workspace root.
 You are one runner in a relay. The runners before you left everything you
 need in files; the runners after you will have only what you leave in files.
 
-**STEP 1 — Law.** Read `garden/PLAN.md` (this file) top to bottom. Read the
-`CLAUDE.md` / `AGENTS.md` ground rules in any repo you will touch. Do NOT
-read the whole spec yet — your packet will name its sections.
+**STEP 1 — Law.** Read `garden/PLAN.md` (this file) top to bottom. Read
+`garden/AMENDMENTS.md` — enacted completions there are law, equal to the
+spec. Read the `CLAUDE.md` / `AGENTS.md` ground rules in any repo you will
+touch. Do NOT read the whole spec yet — your packet will name its sections.
 
 **STEP 2 — Ground truth.** Read `garden/BOARD.md`. Read the LAST handoff
 report in `garden/reports/` (at most the last three — respect your context;
@@ -45,8 +46,11 @@ charge names — fully, at full attention, nothing more.
 **STEP 6 — Work.** Within CONTRACTS (SPEC 1.4). Journal every non-dictated
 decision in the repo's DECISIONS.md citing a Problem Tree node. Defects you
 discover: Blight Protocol (SPEC 2.1) — fix at the deepest containing node or
-flag. Anything requiring a FORBIDDEN feature or contract change: STOP, write
-a FLAG (Section 4), set your packet BLOCKED, end your session.
+flag. A contract that is silent or self-inconsistent on a detail you need:
+COMPLETION — enact it in AMENDMENTS.md and keep moving (Section 2 says what
+qualifies). Anything requiring a FORBIDDEN feature or a true contract
+change: STOP, write a FLAG (Section 4), set your packet BLOCKED, end your
+session.
 
 **STEP 7 — Handoff ritual.** In order: packet exit criteria met → both test
 suites green → DECISIONS.md entries committed → handoff report written
@@ -86,21 +90,45 @@ FAILED_JUDGMENT (see verdict path).
 - Only the claiming session edits its row (plus the human, who may edit
   anything).
 
-## 2. FLAGS.md — the stop-the-line file
+## 2. AMENDMENTS.md & FLAGS.md — solve it yourself, or stop the line
 
-Append-only. A FLAG is how an agent halts safely: contract ambiguity, spec
-bug, FORBIDDEN-feature need, or a Blight-Protocol escalation (fix would
-disturb an ancestor node). Format:
-`[flag-id] [packet] [tree node] — what was found, why it cannot be resolved
-locally, the minimal proposed change, what it disturbs.`
+Contract trouble has two exits. Take the first whenever it qualifies; the
+second is for what the first cannot carry.
+
+**AMENDMENTS.md — decide-and-declare (the default).** Where law is SILENT or
+SELF-INCONSISTENT on a detail your packet needs — a missing field, an
+undefined response shape, a promise the DDL forgot — do not halt: choose the
+minimal completion that honors the spec's stated intent, append it to
+`garden/AMENDMENTS.md` as an EXACT spec diff (template, Section 4), cite the
+amendment id in DECISIONS.md, and build against it. Enacted amendments are
+law for every later agent and the judge. The human audits them at the normal
+between-session review and may veto; a veto becomes a FIXER charge.
+A completion QUALIFIES only if it (a) touches no Invariant (SPEC 1.3), no
+FORBIDDEN row (B.4), no auth or data-loss semantics; (b) reverses no ADR;
+(c) changes nothing an already-DONE packet built; (d) contradicts no
+explicit spec sentence — it fills silence or repairs an internal
+contradiction in the direction the spec itself points. Rule of thumb: if a
+wrong guess would rework committed work or violate standing law, FLAG; if it
+can be completed compatibly and declared where every future agent will read
+it, complete it and move on.
+
+**FLAGS.md — stop-the-line.** Append-only. A FLAG is how an agent halts
+safely when completion does not qualify: FORBIDDEN-feature need, Invariant
+conflict, ADR reversal, a Blight-Protocol escalation (fix would disturb an
+ancestor node), or a genuine design fork (two readings, materially different
+products). Format:
+`[flag-id] [packet] [tree node] — what was found, why COMPLETION does not
+qualify, the minimal proposed change, what it disturbs.`
 A BLOCKED packet stays blocked until the human resolves the flag (usually by
 amending the spec) and resets the row to TODO.
 
 ## 3. Role dispatch (derived from the board, in priority order)
 
-1. **FIXER** — Step 2 found broken ground, or a packet row says
-   FAILED_JUDGMENT. Claim that repair: your charge is the last report or the
-   verdict file; fix per the Blight Protocol; do not add features.
+1. **FIXER** — Step 2 found broken ground, a packet row says
+   FAILED_JUDGMENT, or the human vetoed an amendment (the veto note in
+   AMENDMENTS.md is your charge). Claim that repair: your charge is the last
+   report, the verdict file, or the veto; fix per the Blight Protocol; do
+   not add features.
 2. **JUDGE** — all build packets (S*, H*, I1) are DONE and J is TODO.
    **Independence check: if your context contains ANY build work from this
    milestone, REFUSE the role** — end the session instructing the human to
@@ -128,6 +156,16 @@ notes to the next agent:  <- the generational memory; write what you wish
 ```
 
 **FLAG:** see Section 2 format.
+
+**Amendment** (`garden/AMENDMENTS.md`, append-only):
+```
+[A-NNN] [packet] [spec section] [tree node]
+gap: what the spec fails to say, or says twice differently (one sentence)
+law: the exact contract text as it now stands — a precise diff or the full
+     amended body/DDL/shape, complete enough that both repos and the judge
+     implement identically from this entry alone
+why: how this is the spec's own intent completed, not new design (one line)
+```
 
 ## 5. Packet charges
 
@@ -191,7 +229,8 @@ before the relay continues.
   end-to-end; walk all seven criteria as a BUILDER (not judge); fix gaps;
   seed demo memories; verification/README pointing a judge at everything.
   (Deps: all S*, H*.)
-- **J — Judge.** Sections: B.6, C.8, C.9 ONLY. Fresh session, different
+- **J — Judge.** Sections: B.6, C.8, C.9, plus garden/AMENDMENTS.md
+  (enacted amendments are law) — nothing else. Fresh session, different
   model than the builders (Codex if built by Claude Code). Execute J0–J8
   with browser automation for screenshots; produce
   `verification/m1/VERDICT.md`. Any FAIL → set FAILED_JUDGMENT on the
@@ -204,7 +243,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v1.4): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v1.5): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or
@@ -214,6 +253,9 @@ before the relay continues.
 5. Defects -> Blight Protocol (SPEC 2.1): deepest containing node;
    escalate ancestors/contracts via FLAG.
 6. Contracts are literal: DDL C.2, API C.4, envelope C.7, invariants 1.3.
+   A contract gap or self-contradiction is a COMPLETION (PLAN §2): enact
+   it in garden/AMENDMENTS.md and proceed — never guess silently, never
+   stall on what qualifies.
 7. Done means judged (SPEC B.6): leave experiential + traced evidence.
 8. One packet per session. Handoff ritual, then stop.
 ```
@@ -238,5 +280,7 @@ before the relay continues.
   - after J — read VERDICT.md beside its screenshots; only then is M1
     done, and M2 planning opens (SPEC B.1; M3 re-plans too).
 - Otherwise your between-session review is: the diff, the DECISIONS.md
-  entries, the handoff report. Supervise the relay closely through S2;
-  loosen as the reports earn it.
+  entries, the handoff report, and any new AMENDMENTS.md entries — an
+  amendment stands unless you veto it there (append the veto; a FIXER
+  inherits it). Supervise the relay closely through S2; loosen as the
+  reports earn it.
