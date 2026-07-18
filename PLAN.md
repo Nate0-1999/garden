@@ -7,12 +7,18 @@ last. Everything an agent needs is in files; nothing lives in anyone's head.
 
 **Workspace layout (created by Agent Zero, P0):**
 ```
-garden/            # ops repo: THIS file (PLAN.md), BOARD.md, FLAGS.md, reports/
-spine/             # product repo (SPEC C.1)
-harness/           # product repo (SPEC C.1)
+garden/            # ops repo: THIS file (PLAN.md), SPEC.md (the MASTER
+                   #   constitution), BOARD.md, FLAGS.md, AMENDMENTS.md,
+                   #   reports/          remote: Nate0-1999/garden
+spine/             # product repo (SPEC C.1)   remote: Nate0-1999/memory-palace
+harness/           # product repo (SPEC C.1)   remote: Nate0-1999/harness
 ```
 All three are sibling git repos in one workspace. Sessions launch at the
-workspace root.
+workspace root. `garden/SPEC.md` is the constitution's master; each product
+repo carries a frozen copy at `docs/SPEC.md`, refreshed only at human gates.
+Amending the master is a human act — agents propose via FLAGS, or enact
+qualifying COMPLETIONS via AMENDMENTS.md (Section 2), and never edit
+SPEC.md themselves.
 
 ---
 
