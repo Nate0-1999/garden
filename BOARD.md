@@ -6,7 +6,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | id | packet                         | deps                              | status      | claim                        | verdict |
 |----|--------------------------------|-----------------------------------|-------------|------------------------------|---------|
 | P0 | Agent Zero                     | —                                 | DONE        | codex / 2026-07-17 / 70ed    |         |
-| S1 | DB layer & CAS rules           | P0                                | TODO        |                              |         |
+| S1 | DB layer & CAS rules           | P0                                | IN_PROGRESS | codex / 2026-07-17 / 5f1c    |         |
 | S2 | Memory CRUD & dedup bands      | S1                                | TODO        |                              |         |
 | S3 | Scorer v0 + inject/prepare     | S2                                | TODO        |                              |         |
 | S4 | Commit, feedback, quarantine   | S3                                | TODO        |                              |         |
