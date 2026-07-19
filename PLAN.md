@@ -88,6 +88,9 @@ FAILED_JUDGMENT (see verdict path).
 **Rules:**
 - Claim only a TODO packet whose deps are all DONE. If several qualify,
   take the lowest id (determinism beats optimization).
+- HUMAN packets (marked in Section 5; currently D1) are never claimed by an
+  agent. If every dependency-ready packet is HUMAN, write no code: end the
+  session directing the human to the gate.
 - **Stale claim recovery:** an IN_PROGRESS claim from a session that left no
   handoff report is stale after inspection confirms the session is dead.
   Inspect its branch: salvage what passes tests into your work if trivial,
@@ -206,6 +209,19 @@ before the relay continues.
   never → bias → quarantine at 3; "wrong" returns unit; exact final_block
   renderer; stats updates. Nodes: P1.2.1a–d.
 
+**Cloud gate**
+- **D1 — GCP deploy & remote verification (HUMAN — agents never claim).**
+  Sections: ADR-003, C.8. The human, assisted outside the relay, deploys
+  spine to Cloud Run with Cloud SQL for PostgreSQL + pgvector per ADR-003,
+  runs Alembic there, and re-verifies the S1–S4 surface against the cloud
+  URL with real embeddings: /healthz, then a create → dedup → prepare →
+  commit round trip. Exit: BOARD row DONE with the cloud URL noted in the
+  claim; H5 and later harness work exercise the deployed spine (contract
+  tests may still use a local container; C.8 criterion 1 still runs on
+  local compose). (Deps: S4.) Rationale: B.3 commits M1 to "spine on Cloud
+  Run" — the gate exists so the relay cannot finish M1 having only ever
+  talked to localhost.
+
 **Harness track**
 - **H1 — Envelope + daemon WS.** Sections: C.7, C.1. Deliver: envelope
   models, WS server, type routing, malformed-envelope rejection tests.
@@ -281,6 +297,8 @@ before the relay continues.
     contractor wrote it (cheapest possible recalibration).
   - after S3 — hand-verify one injection's scores against C.3 by
     calculator (catches golden tests written from code instead of spec).
+  - after S4 — execute D1 yourself: spine onto Cloud Run + Cloud SQL,
+    verified remotely with real embeddings, before any gate work begins.
   - after H5 — use the gate yourself for a day of real prompts; the gate
     is the product's soul and no judge substitutes for your hands.
   - after J — read VERDICT.md beside its screenshots; only then is M1
