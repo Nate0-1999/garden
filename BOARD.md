@@ -8,7 +8,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | P0 | Agent Zero                     | —                                 | DONE        | codex / 2026-07-17 / 70ed    |         |
 | S1 | DB layer & CAS rules           | P0                                | DONE        | codex / 2026-07-17 / 5f1c    |         |
 | S2 | Memory CRUD & dedup bands      | S1                                | DONE        | codex / 2026-07-17 / c842    |         |
-| S3 | Scorer v0 + inject/prepare     | S2                                | TODO        |                              |         |
+| S3 | Scorer v0 + inject/prepare     | S2                                | IN_PROGRESS | codex / 2026-07-19 / b73a    |         |
 | S4 | Commit, feedback, quarantine   | S3                                | TODO        |                              |         |
 | H1 | Envelope + daemon WS           | P0                                | TODO        |                              |         |
 | H2 | spine_client + contract tests  | S2                                | TODO        |                              |         |
