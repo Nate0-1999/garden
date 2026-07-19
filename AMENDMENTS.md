@@ -87,3 +87,66 @@ law: After POST/PATCH `/v1/memories`' behavior, add: "For M1, label length is
      before embedding or any database write."
 why: This makes the existing 64-character/128-token atomic-memory limits
      deterministic across providers without changing either configured bound.
+
+[A-007] [S3] [SPEC C.3] [P1.2]
+gap: C.3 leaves the keyword tokenizer, decay clock, budget units and rounding,
+     tie breaks, pin ordering, rank meaning, and budget-skipped near misses
+     undefined even though they change the exact prepare result.
+law: After C.3's scorer rules, add: "For scorer v0, `tokens` are maximal runs
+     of Unicode alphanumeric characters after lowercase conversion. `kw`
+     removes the exact stopword set `{a, an, and, are, as, at, be, by, for,
+     from, has, he, in, is, it, its, of, on, that, the, to, was, were, will,
+     with}`; each stored keyword is tokenized by the same rule before union.
+     Time and human-edit ages are measured from `thread.snapshot_ts`, in
+     elapsed seconds divided by 86400, with negative ages clamped to zero; a
+     human edit is a `memory_revision` whose editor is exactly `user`. Semantic
+     cosine is clamped to `[0,1]`. A project match requires a non-null thread
+     project equal to the memory project; a null memory project scores 0.5.
+     Eligible `pin=true` units are fetched outside the non-pinned vector pool
+     and top-k limit, scored only to populate the explainability fields, ordered
+     by `memory_id` ASC, and injected first regardless of threshold or budget.
+     Their `cl100k_base` body-token costs reduce the regular budget to no less
+     than zero; pins alone may exceed it. The regular budget is
+     `min(budget_tokens, floor(budget_pct * model_context_tokens))`, and each
+     regular card costs its body's `cl100k_base` tokens. The non-pinned vector
+     pool orders cosine DESC then `memory_id` ASC; scored regular candidates
+     order score DESC then `memory_id` ASC. Greedy selection scans that order,
+     accepts at most `top_k`, and after an over-budget card continues to the
+     next. Near misses are the first `near_miss_k` unselected regular candidates
+     in score order, including candidates excluded by threshold, budget, or the
+     top-k cap. Rank is one-based in the combined complete order: pins first,
+     then all regular candidates in score order; returned lists retain those
+     ranks even when intervening candidates are not returned. `kind='pinned'`
+     without `pin=true` does not bypass scoring."
+why: These are deterministic mechanics for the scorer C.3 already specifies;
+     they add no feature, signal, or learning behavior.
+
+[A-008] [S3] [SPEC C.4 POST /v1/inject/prepare] [P1.2]
+gap: C.4 promises a frozen revision-backed read although C.2 cannot reconstruct
+     historical scoring state, while M1 permits only one prepare per thread;
+     it also leaves event membership and injection-counter membership unstated.
+law: After POST `/v1/inject/prepare`'s behavior, add: "M1 accepts exactly one
+     successful prepare per thread, as required by C.6's one-injection flow. A
+     thread row with non-null `snapshot_ts` returns RFC7807 409 on another
+     prepare. An existing unstamped row may be stamped only when its principal,
+     agent, machine, and project fields exactly match the request; mismatch
+     returns RFC7807 409. Prompt embedding completes before the atomic database
+     phase. That phase uses one repeatable-read transaction, stamps
+     `snapshot_ts` from the database clock, reads and scores the heads visible
+     at that boundary, writes events, and updates statistics; a conflict rolls
+     back the entire phase. Each returned card writes exactly one
+     `injection_event`: injected `pin=true` cards use `shown_as='pinned'`, other
+     injected cards use `shown_as='injected'`, and near misses use
+     `shown_as='near_miss'`; stored score, six features, and rank equal the
+     response and outcome is null. To preserve the frozen card for replay and
+     commit without changing C.2's DDL, the event's features JSON additionally
+     contains `_memory: {label, body, pin, updated_at}` from the scored
+     snapshot; the wire `features` object remains the exact six-field C.4
+     shape. `stats.injections` increments once and `stats.last_injected_at` is
+     set to `snapshot_ts` for each card in `injected`, including pins, and never
+     for a near miss. Those server writes use C.2 CAS, append revisions with
+     editor `system:inject`, origin machine from the request, and reason
+     `inject/prepare`."
+why: The one-shot transaction is the smallest implementation of M1's explicit
+     one-injection-per-thread law; event snapshots keep the log replayable, and
+     the counter rule follows rather than weakens the standing CAS invariant.
