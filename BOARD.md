@@ -11,7 +11,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | S3 | Scorer v0 + inject/prepare     | S2                                | DONE        | codex / 2026-07-19 / b73a    |         |
 | S4 | Commit, feedback, quarantine   | S3, S5                            | DONE        | codex / 2026-07-19 / a4c9    |         |
 | S5 | origin_path metadata           | S3                                | DONE        | codex / 2026-07-19 / e5a7    |         |
-| S6 | /v1/search                     | S2                                | TODO        |                              |         |
+| S6 | /v1/search                     | S2                                | IN_PROGRESS | codex / 2026-07-19 / f6a2    |         |
 | D1 | GCP deploy gate (HUMAN)        | S4                                | IN_PROGRESS | human+claude / 2026-07-19    |         |
 | D2 | Billing circuit breaker        | P0                                | TODO        |                              |         |
 | H1 | Envelope + daemon WS           | P0                                | TODO        |                              |         |
