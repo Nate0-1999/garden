@@ -251,6 +251,23 @@ before the relay continues.
   local compose). (Deps: S4.) Rationale: B.3 commits M1 to "spine on Cloud
   Run" — the gate exists so the relay cannot finish M1 having only ever
   talked to localhost.
+- **D2 — Billing circuit breaker (build: agent; deploy: HUMAN).** Sections:
+  none (pure infra; pattern: Google's documented "disable billing with
+  notifications"). Deliver in spine `infra/billing-breaker/`: a Cloud Run
+  function (Python 3.12) subscribed to a `billing-breaker` Pub/Sub topic
+  that parses budget notifications and, when costAmount >= budgetAmount,
+  DETACHES billing from project `n8-memory-palace` via the Cloud Billing
+  API (updateBillingInfo, empty billingAccountName) — deliberately
+  terminating all project services; idempotent and decision-logged; unit
+  tests on fixture notifications with NO live cloud calls; a deploy script
+  that creates the topic, points the existing $100 budget at it, and
+  deploys the function under a dedicated service account holding Project
+  Billing Manager on this project ONLY; a README runbook with a
+  synthetic-message drill and billing re-attach steps. Agents build and
+  test but NEVER execute the deploy script or any gcloud mutation — the
+  human runs the runbook at a gate. Revisit when Google's Spend Caps
+  (private preview 2026; covers Cloud Run but NOT Cloud SQL) reaches GA.
+  Nodes: P4. (Deps: P0.)
 
 **Harness track**
 - **H1 — Envelope + daemon WS.** Sections: C.7, C.1. Deliver: envelope
