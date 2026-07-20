@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v1.13. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v1.14. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -284,18 +284,22 @@ before the relay continues.
   single adapter module; ship it as a pydantic-ai v2 Capability subclass;
   nothing outside the adapter imports pydantic-ai capability machinery.
   Nodes: P1.2, P1.4. (Deps: H2.)
-- **H4 — Web shell + chat.** Sections: C.1 web/, C.7, ADR-009 mobile law.
-  Deliver: responsive SPA — thread list, chat pane, run.delta streaming;
-  sane at 390px. Nodes: P2, P3. (Deps: H1.)
-- **H5 — The gate.** Sections: C.6 steps 1–4, ADR-005 gate UX. Deliver:
-  prepare-on-send; modal with full bodies + per-feature scores; one-tap ✕,
-  modifier reasons, near-miss add-back; hard pause; commit → run. Nodes:
-  P1.2.1a–c. (Deps: S4, H4.) The human personally uses the result before
-  the relay continues (Section 7).
-- **H6 — Memory panel.** Sections: C.6 (live panel), C.4 (feedback, PATCH).
-  Deliver: live list; ad-hoc remove → mid_thread_removed → re-render next
-  call; edit flow with CAS conflict surfacing; manual pin toggle. Nodes:
-  P1.2.1d, P1.3. (Deps: H5.)
+- **H4 — Web shell + chat.** Sections: C.1 web/, C.7 (v1.12), ADR-009
+  mobile law, B.6 rule 7. Deliver: responsive SPA — thread list, chat pane,
+  run.delta streaming; sane at 390px. Verification per B.6 rule 7: drive
+  the real UI with browser automation as a user would; screenshots of every
+  acceptance state committed as evidence. Nodes: P2, P3. (Deps: H1, H7.)
+- **H5 — The gate.** Sections: C.6 steps 1–4, ADR-005 gate UX, B.6 rule 7.
+  Deliver: prepare-on-send; modal with full bodies + per-feature scores;
+  one-tap ✕, modifier reasons, near-miss add-back; hard pause; commit →
+  run. Verification per B.6 rule 7 (browser-driven, screenshot evidence).
+  Nodes: P1.2.1a–c. (Deps: D1, H4.) The human personally uses the result
+  before the relay continues (Section 7).
+- **H6 — Memory panel.** Sections: C.6 (live panel), C.4 (feedback, PATCH),
+  B.6 rule 7. Deliver: live list; ad-hoc remove → mid_thread_removed →
+  re-render next call; edit flow with CAS conflict surfacing; manual pin
+  toggle. Verification per B.6 rule 7 (browser-driven, screenshot
+  evidence). Nodes: P1.2.1d, P1.3. (Deps: H5.)
 - **H7 — Envelope v1.12 & loop controls.** Sections: C.7 (v1.12), ADR-014
   (M1 subset). Deliver: daemon behavior + envelope models for run.started,
   run.cancel (confirmed abort, work preserved), prompt.queued
@@ -326,7 +330,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v1.13): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v1.14): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or
