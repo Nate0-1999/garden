@@ -14,7 +14,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | S6 | /v1/search                     | S2                                | DONE        | codex / 2026-07-19 / f6a2    |         |
 | D1 | GCP deploy gate (HUMAN)        | S4                                | IN_PROGRESS | human+claude / 2026-07-19    |         |
 | D2 | Billing circuit breaker        | P0                                | DONE        | codex / 2026-07-19 / b61b    |         |
-| H1 | Envelope + daemon WS           | P0                                | IN_PROGRESS | codex / 2026-07-20 / 25ff    |         |
+| H1 | Envelope + daemon WS           | P0                                | DONE        | codex / 2026-07-20 / 25ff    |         |
 | H2 | spine_client + contract tests  | S2                                | TODO        |                              |         |
 | H3 | Agent + memory tools           | H2, S6                            | TODO        |                              |         |
 | H4 | Web shell + chat               | H1                                | TODO        |                              |         |
