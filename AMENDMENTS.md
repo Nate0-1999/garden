@@ -279,3 +279,74 @@ law: Replace `save_memory(label, body, kind, keywords?, project_scoped: bool)`
      the near-similar band and does not override label or hard-duplicate 409s.
 why: This makes C.6's already-required retry executable using C.4's enacted
      force field without adding another behavior family.
+
+[A-016] [H7] [SPEC C.7 v1.12] [P3]
+gap: C.7 names the loop messages but does not define their executable payloads,
+     acknowledgement/cancellation correlation, queue and snapshot ordering, or
+     how an M1 connection identifies the active thread; it also calls
+     thread.snapshot D→C while requiring a client request.
+law: Complete C.7 v1.12 with the following rules. `run_id` is a
+     daemon-generated ULID allocated once when prompt.submit is accepted,
+     including when it is queued; `prompt_id` is that inbound envelope's `id`.
+     prompt.submit has a non-blank string `prompt` and requires outer
+     `thread_id`. These payload members are required: run.started
+     `{run_id,prompt_id}`; prompt.queued `{run_id,prompt_id}`; run.cancel
+     `{run_id}`; run.delta text/thinking
+     `{run_id,kind:"text"|"thinking",text:string}` or event
+     `{run_id,kind:"event",event:object}`; run.usage
+     `{run_id,requests,input_tokens,output_tokens}`; run.done
+     `{run_id,stop_reason,partial}`; gate.open
+     `{run_id,kind:"memory_gate",...}`; gate.commit `{run_id,...}`; and
+     gate.dismiss `{run_id,...}`. Usage fields are non-negative integer
+     cumulative totals for that run and never decrease; C.7's "incremental"
+     means that updated cumulative snapshots may be emitted while the run
+     advances. `stop_reason` is
+     `end_turn|cancelled|error|budget_exceeded`; `partial` is false exactly for
+     end_turn and true otherwise. These are minimum object members: additional
+     JSON members are allowed and preserved so later gate and event contracts
+     can extend them.
+
+     thread.snapshot is bidirectional. A C→D request requires outer
+     `thread_id` and payload `{request:true}`. Its D→C response carries
+     `{messages,open_gate,active_run}`: `messages` is the daemon's ordered array
+     of JSON message objects, including queued prompts and already-produced
+     partial work; `open_gate` is null or the current gate.open payload; and
+     `active_run` is null or `{run_id,prompt_id,state,usage,queued}`, with state
+     `running|waiting_gate|cancelling`, usage in the run.usage shape without a
+     second run_id, and queued an ordered array of
+     `{run_id,prompt_id,prompt}`. Additional members are allowed and preserved.
+     For M1 the daemon keeps one process-local active thread, selected by the
+     latest valid thread.snapshot request or prompt.submit. On every WS connect
+     it sends exactly one snapshot before live events when that thread exists;
+     when none exists it sends none until a request or prompt selects one.
+     Requesting an unknown thread returns the empty snapshot. Thread/run state
+     survives a socket disconnect for the daemon process lifetime; reconnect
+     sends the snapshot only and never replays old deltas or other prior
+     events. This local selection is not a session or authorization boundary.
+
+     A prompt received while its thread has a live run is appended once to a
+     process-local FIFO and immediately acknowledged by prompt.queued. After
+     every terminal run.done, the oldest queued prompt starts once: the prior
+     run.done is emitted before its run.started, and the reserved run_id is
+     reused. Cancellation applies only to the matching active run. The daemon
+     first requests cancellation, awaits model/tool-batch termination and
+     records terminal cancelled tool results, preserves all prior
+     messages/output, emits gate.dismiss before run.done when a gate was open,
+     and emits exactly one run.done(cancelled); no run.delta or run.usage for
+     that run follows it. A duplicate cancellation while cancellation is
+     pending shares that one confirmation. A stale, unknown, or already-
+     terminal run_id produces error `{code:"run_not_active",run_id}` and
+     cancels nothing. Queued prompts survive every terminal reason.
+
+     Every daemon-created envelope has a fresh outer ULID `id` and timestamp;
+     prompt_id supplies acknowledgement correlation. `type` accepts any
+     non-blank string. The required payload validation above applies to known
+     M1 behavior types. Reserved names and all other unknown types retain
+     arbitrary JSON payloads and pass outer-envelope validation; an endpoint
+     with a forward target forwards them unchanged, and an M1 daemon with none
+     ignores them without emitting the not-implemented error. A-013 malformed-
+     frame handling remains unchanged.
+why: This fills only the wire/state details H7 must implement, repairs the
+     snapshot request direction in the direction C.7 already promises, and
+     uses daemon-lifetime local state rather than inventing sessions,
+     authorization, M3 controls, or H4/H5-specific behavior.
