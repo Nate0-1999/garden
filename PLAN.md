@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v1.14. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v1.15. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -63,7 +63,10 @@ tag (tool + date + short id) and commit this claim to `garden` BEFORE any
 other work. The claim-commit is your baton pickup.
 
 **STEP 5 — Focused law.** Now read exactly the spec sections your packet
-charge names — fully, at full attention, nothing more.
+charge names — fully, at full attention, nothing more. If your packet
+touches user-facing surface (UI, visualization, interaction), ALSO read
+`garden/NATES_VISION.md` — the owner's extended vision (GUIDANCE per SPEC
+1.4): deviate from it only with a journaled DECISIONS.md entry.
 
 **STEP 6 — Work.** Within CONTRACTS (SPEC 1.4). Journal every non-dictated
 decision in the repo's DECISIONS.md citing a Problem Tree node. Defects you
@@ -330,7 +333,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v1.14): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v1.15): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or
