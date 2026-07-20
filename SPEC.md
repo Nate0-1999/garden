@@ -1376,7 +1376,12 @@ CREATE TABLE scorer_config (
 ```
 Rules: UPDATEs on memory_unit require `WHERE revision = :expected` and bump
 revision + write memory_revision, all in one transaction; conflict → HTTP 409
-with current unit in body. Tombstone = status change, never DELETE.
+with current unit in body. A successful cloud-head CAS from revision n to n+1
+sets `memory_unit.updated_at = now()` and appends exactly one
+`memory_revision` with `revision = n+1`, `parent_uid` equal to the prior
+cloud-head revision's `rev_uid`, and `body` / `label` equal to the resulting
+`memory_unit` values. A failed CAS changes neither table. [folded from A-001]
+Tombstone = status change, never DELETE.
 
 ## C.3 Scorer v0 (hand-set)
 
@@ -1401,16 +1406,70 @@ For prompt q and candidate m (status='active', principal match, and
 - M1 sets `bias` only via removed:never (−0.15 each, quarantine at
   never_kills≥3). No other learning in M1; everything else is logged only.
 
+  For scorer v0, `tokens` are maximal runs of Unicode alphanumeric characters
+  after lowercase conversion. `kw` removes the exact stopword set `{a, an,
+  and, are, as, at, be, by, for, from, has, he, in, is, it, its, of, on,
+  that, the, to, was, were, will, with}`; each stored keyword is tokenized by
+  the same rule before union. Time and human-edit ages are measured from
+  `thread.snapshot_ts`, in elapsed seconds divided by 86400, with negative
+  ages clamped to zero; a human edit is a `memory_revision` whose editor is
+  exactly `user`. Semantic cosine is clamped to `[0,1]`. A project match
+  requires a non-null thread project equal to the memory project; a null
+  memory project scores 0.5. Eligible `pin=true` units are fetched outside
+  the non-pinned vector pool and top-k limit, scored only to populate the
+  explainability fields, ordered by `memory_id` ASC, and injected first
+  regardless of threshold or budget. Their `cl100k_base` body-token costs
+  reduce the regular budget to no less than zero; pins alone may exceed it.
+  The regular budget is
+  `min(budget_tokens, floor(budget_pct * model_context_tokens))`, and each
+  regular card costs its body's `cl100k_base` tokens. The non-pinned vector
+  pool orders cosine DESC then `memory_id` ASC; scored regular candidates
+  order score DESC then `memory_id` ASC. Greedy selection scans that order,
+  accepts at most `top_k`, and after an over-budget card continues to the
+  next. Near misses are the first `near_miss_k` unselected regular candidates
+  in score order, including candidates excluded by threshold, budget, or the
+  top-k cap. Rank is one-based in the combined complete order: pins first,
+  then all regular candidates in score order; returned lists retain those
+  ranks even when intervening candidates are not returned. `kind='pinned'`
+  without `pin=true` does not bypass scoring. [folded from A-007]
+
 ## C.4 Spine API (M1 surface, exact bodies)
 
-Auth: `Authorization: Bearer $SPINE_TOKEN` on all routes. Errors: RFC7807 JSON.
+Auth: `Authorization: Bearer $SPINE_TOKEN` on all routes. Unless a route
+specifies an exact error body below, errors use RFC7807 JSON. The
+`label_conflict`, `duplicate_of`, and `conflict` 409 bodies specified by
+POST/PATCH `/v1/memories` are exact `application/json` responses and are the
+only C.4 exceptions. [folded from A-002]
 
 POST /v1/inject/prepare
   req: {thread_id, agent_id, machine_id, principal_id, project_key?,
         agent_kind?, prompt, model_context_tokens}
+  Require `model_context_tokens > 0`; a violation returns RFC7807 422 before
+  embedding or any database write. [folded from A-014]
   beh: create thread row if new (sets snapshot_ts=now()); embed prompt;
        candidates read as-of thread.snapshot_ts (latest revision ≤ snapshot_ts);
        write injection_event rows (outcome NULL); update stats.injections.
+  M1 accepts exactly one successful prepare per thread, as required by C.6's
+  one-injection flow. A thread row with non-null `snapshot_ts` returns
+  RFC7807 409 on another prepare. An existing unstamped row may be stamped
+  only when its principal, agent, machine, and project fields exactly match
+  the request; mismatch returns RFC7807 409. Prompt embedding completes
+  before the atomic database phase. That phase uses one repeatable-read
+  transaction, stamps `snapshot_ts` from the database clock, reads and scores
+  the heads visible at that boundary, writes events, and updates statistics;
+  a conflict rolls back the entire phase. Each returned card writes exactly
+  one `injection_event`: injected `pin=true` cards use `shown_as='pinned'`,
+  other injected cards use `shown_as='injected'`, and near misses use
+  `shown_as='near_miss'`; stored score, six features, and rank equal the
+  response and outcome is null. To preserve the frozen card for replay and
+  commit without changing C.2's DDL, the event's features JSON additionally
+  contains `_memory: {label, body, pin, updated_at}` from the scored
+  snapshot; the wire `features` object remains the exact six-field C.4
+  shape. `stats.injections` increments once and `stats.last_injected_at` is
+  set to `snapshot_ts` for each card in `injected`, including pins, and never
+  for a near miss. Those server writes use C.2 CAS, append revisions with
+  editor `system:inject`, origin machine from the request, and reason
+  `inject/prepare`. [folded from A-008]
   res: {injection_id, snapshot_ts, scorer_version,
         injected: [MemoryCard], near_misses: [MemoryCard]}
   MemoryCard: {memory_id, label, body, kind, pin, score,
@@ -1429,6 +1488,46 @@ POST /v1/inject/commit
   beh: set outcomes (kept for the untouched injected set); apply
        removed:never bias/quarantine rule; reason "wrong" additionally returns
        the unit so the UI can open the edit flow.
+  The event batch is every `injection_event` row with the requested
+  `injection_id`. Each `removed` memory ID must be distinct and name a batch
+  row whose `shown_as` is `injected` or `pinned`; each `added_back` ID must
+  be distinct and name a `near_miss` row; the lists must be disjoint.
+  Duplicate, foreign, or wrong-class choices return RFC7807 422 with no
+  write. No batch rows plus nonempty choices returns RFC7807 404. No batch
+  rows plus both lists empty succeeds with the canonical zero-member C.6
+  block and `wrong_removed=[]`; because A-008 persists no batch row for a
+  zero-card prepare, this also accepts any unknown injection UUID with empty
+  choices in M1.
+
+  The desired commit outcome is `removed:<reason>` for each removed row,
+  `kept` for every untouched injected or pinned row, and `added_back` for
+  each selected near miss; an unselected near miss remains NULL. Outcomes
+  transition from NULL exactly once. Repeating the same desired outcome is
+  idempotent. For retry comparison, `cited` or `mid_thread_removed` is a
+  descendant of `kept` when `shown_as` is injected/pinned and of
+  `added_back` when `shown_as` is near_miss. Any different non-NULL outcome
+  returns RFC7807 409 with no write. An all-near-miss commit with no add-back
+  is necessarily a durable no-op under the frozen C.2 schema.
+
+  Only a new NULL-to-outcome transition changes head statistics. Each newly
+  removed row increments `stats.removals` once. A new `removed:never` also
+  increments `stats.never_kills`, adds that event's scorer-version
+  `never_bias_step` to `bias`, and changes an ACTIVE head to quarantined when
+  the resulting kill count is at least that version's `quarantine_kills`;
+  an already quarantined or tombstoned status is preserved. Each newly
+  `added_back` row increments `stats.injections` once and sets
+  `stats.last_injected_at` to the commit transaction's database clock. Load
+  the two never parameters from the event's `scorer_version` row. Apply all
+  new event outcomes, head changes, and revisions atomically; update each
+  affected head once through C.2 CAS in memory-ID order with editor
+  `system:inject`, the event's `machine_id`, and reason
+  `inject/commit:<outcome>`. `wrong_removed` contains the post-stat CURRENT
+  MemoryUnit for every requested `removed:wrong`, ordered by event rank.
+
+  Final members are rows whose outcome is `kept`, `added_back`, or `cited`,
+  ordered by rank ASC then memory_id ASC. Render them only from the frozen
+  event `_memory` payload and `memory_kind`, never from a current head.
+  [folded from A-009]
   res: {final_block: string,        # the exact rendered block (C.6) the harness injects
         wrong_removed: [MemoryUnit]} # current unit for each removed:"wrong" so the
                                      # UI opens the edit flow with a valid
@@ -1437,6 +1536,19 @@ POST /v1/inject/commit
 POST /v1/feedback            # mid-thread, ad-hoc
   req: {injection_id, memory_id, signal: "mid_thread_removed"|"cited"}
   res: {ok: true}
+  Feedback targets the single `injection_event` matching both IDs; no match
+  returns RFC7807 404. A new signal may transition only `kept` or
+  `added_back` to the signal's literal outcome. Repeating that same signal is
+  idempotent `{ok:true}` with no new write. Outcome NULL, any `removed:*`
+  outcome, or the other feedback signal returns RFC7807 409.
+  `mid_thread_removed` also increments the current head's `stats.removals`
+  exactly once through C.2 CAS; its event transition, head update, and
+  revision are one transaction using editor `system:feedback`, the event's
+  `machine_id`, and reason `feedback/mid_thread_removed`. It changes no bias,
+  status, citation, or other statistic. In M1, `cited` is event-log-only: it
+  writes the outcome but does not change `stats.citations`, write a memory
+  revision, or affect scorer v0, whose citation feature remains inert.
+  [folded from A-010]
 
 POST /v1/memories
   req: {principal_id, label, body, kind, keywords?,
@@ -1452,6 +1564,13 @@ POST /v1/memories
          (caller decides, may retry with force=true; force skips ONLY this band);
        else insert (revision 1 + memory_revision row,
          origin_machine_id = machine_id).
+  Dedup comparisons include only ACTIVE units with the same principal.
+  `duplicate_of` is the unit with greatest cosine similarity, breaking
+  equal-score ties by `memory_id` ASC. `similar` contains every such unit
+  whose score satisfies `dedup_sim <= score < dedup_dup`, ordered by score
+  DESC then `memory_id` ASC; M1 applies no additional result cap. The
+  configured thresholds are inclusive at `dedup_sim` and `dedup_dup` as those
+  inequalities state. [folded from A-003]
   res: 201 {created: MemoryUnit}
 
 PATCH /v1/memories/{id}
@@ -1460,14 +1579,41 @@ PATCH /v1/memories/{id}
   beh: CAS per C.2 rules; the revision row gets origin_machine_id = machine_id;
        a label change colliding with another active unit → 409 {label_conflict}
        as on create.
+  A mutable property whose JSON value is null is treated as omitted. With
+  zero remaining mutable properties, return RFC7807 422; for an absent memory
+  ID, return RFC7807 404. A supplied non-null `body` is embedded before the
+  CAS, and a successful CAS writes its `body`, `embedding`, and
+  `embedding_model` atomically. The CAS condition is evaluated before
+  active-label uniqueness: a stale revision returns `{conflict: MemoryUnit}`.
+  Any successful-revision write whose resulting status and label would
+  collide with another ACTIVE unit of that principal returns
+  `{label_conflict}`, including reactivation without a label change.
+  [folded from A-004]
+  For M1, label length is measured in Unicode code points and body length is
+  measured with the `cl100k_base` tokenizer. On create, and for each non-null
+  replacement value supplied to PATCH, require `len(label) <= cfg.label_max`
+  and `tokens(body) <= cfg.memory_max_tokens`; a violation returns RFC7807
+  422 before embedding or any database write. [folded from A-006]
   res: 200 MemoryUnit | 409 {conflict: MemoryUnit}   # current unit, per C.2 rules
 
 GET  /v1/memories?project_key=&status=&q=&limit=&offset=
   beh: panel list; limit default 50 max 200, offset default 0;
        ordered by updated_at DESC, memory_id ASC (stable paging).
+  Supplied filters are ANDed; omitted `project_key` and `status` apply no
+  filter. Trim `q`; blank applies no filter, otherwise it is a
+  case-insensitive literal substring match over `label` or `body`. `total` is
+  the filtered count before paging. Require `1 <= limit <= 200` and
+  `offset >= 0`. [folded from A-005]
   res: {items: [MemoryUnit], total, limit, offset}
 POST /v1/search             req: {principal_id, query, k=10, project_key?}
                             res: {results: [MemoryCard]}  (agent tool backend)
+  Require `1 <= k <= 50`; a violation returns RFC7807 422 before embedding.
+  An omitted or JSON-null `project_key` applies no project filter. A non-null
+  `project_key` admits only ACTIVE units whose `project_key` is NULL or
+  exactly equal to the request value. Results are the first k ordered by raw
+  cosine similarity DESC then `memory_id` ASC. Search applies no scorer
+  threshold, weights, bias, pin priority, or candidate re-ranking; `score` is
+  that raw cosine and `features` / `rank` are null. [folded from A-012]
 
 ## C.5 Config defaults (single source: spine config.py / harness config.py)
 
@@ -1512,10 +1658,24 @@ Treat them as your own accumulated knowledge; they may be imperfect.
 </memory_system>
 ```
 
+  Join structural lines with LF, with no blank separator lines and no
+  terminal LF. Emit attributes in `label`, `kind`, `updated` order. In
+  attributes escape `&`, `<`, `>`, and `"` as `&amp;`, `&lt;`, `&gt;`, and
+  `&quot;`, and encode tab, LF, and CR as `&#9;`, `&#10;`, and `&#13;`. In
+  body text escape only `&`, `<`, and `>`; preserve every other character and
+  existing newline. Use frozen event values verbatim apart from that
+  escaping. With zero members, return these four lines exactly:
+  `<memory_system>`, the two literal preamble lines from the template, and
+  `</memory_system>`. [folded from A-011]
+
 Agent tools (tools_memory.py; docstrings are the model-facing spec):
-- save_memory(label, body, kind, keywords?, project_scoped: bool)
+- save_memory(label, body, kind, keywords?, project_scoped: bool,
+  force: bool = false)
   → handles 409/similar responses by surfacing them to the model
     ("similar memory exists: ...; update it, or call again with force=true").
+  Forward force unchanged to C.4 POST /v1/memories. The tool never enables
+  or retries force automatically. `true` skips only the near-similar band and
+  does not override label or hard-duplicate 409s. [folded from A-015]
 - search_memory(query, k=5) → MemoryCards rendered compactly.
 - edit_memory(label_or_id, new_body, reason) → CAS retry once on 409.
 Agent instructions addition (verbatim, part of capability):
@@ -1564,6 +1724,116 @@ RESERVED M3 type names (relay and clients MUST forward/ignore unknown
 types unchanged): run.steer, plan.update, checkpoint.created,
 checkpoint.restore, presence.update. The relay in M3 forwards all types
 unchanged; nothing in the UI may assume localhost.
+
+  Each browser-to-daemon message occupies exactly one JSON text frame whose
+  top-level value validates as the C.7 envelope. A binary frame, invalid
+  JSON, non-object JSON value, or object that fails envelope validation is
+  malformed. On the first malformed message, the daemon invokes no type
+  handler, closes that `/ws` connection with WebSocket code 1008 and reason
+  `invalid C.7 envelope`, and performs no further processing on that
+  connection. [folded from A-013]
+
+  `run_id` is a daemon-generated ULID allocated once when prompt.submit is
+  accepted, including when it is queued; `prompt_id` is that inbound
+  envelope's `id`. prompt.submit has a non-blank string `prompt` and requires
+  outer `thread_id`. These payload members are required: run.started
+  `{run_id,prompt_id}`; prompt.queued `{run_id,prompt_id}`; run.cancel
+  `{run_id}`; run.delta text/thinking
+  `{run_id,kind:"text"|"thinking",text:string}` or event
+  `{run_id,kind:"event",event:object}`; run.usage
+  `{run_id,requests,input_tokens,output_tokens}`; run.done
+  `{run_id,stop_reason,partial}`; gate.open
+  `{run_id,kind:"memory_gate",...}`; gate.commit `{run_id,...}`; and
+  gate.dismiss `{run_id,...}`. Usage fields are non-negative integer
+  cumulative totals for that run and never decrease; C.7's "incremental"
+  means that updated cumulative snapshots may be emitted while the run
+  advances. `stop_reason` is
+  `end_turn|cancelled|error|budget_exceeded`; `partial` is false exactly for
+  end_turn and true otherwise. These are minimum object members: additional
+  JSON members are allowed and preserved so later gate and event contracts
+  can extend them.
+
+  thread.snapshot is bidirectional. A C→D request requires outer
+  `thread_id` and payload `{request:true}`. Its D→C response carries
+  `{messages,open_gate,active_run}`: `messages` is the daemon's ordered array
+  of JSON message objects, including queued prompts and already-produced
+  partial work; `open_gate` is null or the current gate.open payload; and
+  `active_run` is null or `{run_id,prompt_id,state,usage,queued}`, with state
+  `running|waiting_gate|cancelling`, usage in the run.usage shape without a
+  second run_id, and queued an ordered array of
+  `{run_id,prompt_id,prompt}`. Additional members are allowed and preserved.
+  For M1 the daemon keeps one process-local active thread, selected by the
+  latest valid thread.snapshot request or prompt.submit. On every WS connect
+  it sends exactly one snapshot before live events when that thread exists;
+  when none exists it sends none until a request or prompt selects one.
+  Requesting an unknown thread returns the empty snapshot. Thread/run state
+  survives a socket disconnect for the daemon process lifetime; reconnect
+  sends the snapshot only and never replays old deltas or other prior
+  events. This local selection is not a session or authorization boundary.
+
+  A prompt received while its thread has a live run is appended once to a
+  process-local FIFO and immediately acknowledged by prompt.queued. After
+  every terminal run.done, the oldest queued prompt starts once: the prior
+  run.done is emitted before its run.started, and the reserved run_id is
+  reused. Cancellation applies only to the matching active run. The daemon
+  first requests cancellation, awaits model/tool-batch termination and
+  records terminal cancelled tool results, preserves all prior
+  messages/output, emits gate.dismiss before run.done when a gate was open,
+  and emits exactly one run.done(cancelled); no run.delta or run.usage for
+  that run follows it. A duplicate cancellation while cancellation is
+  pending shares that one confirmation. A stale, unknown, or already-
+  terminal run_id produces error `{code:"run_not_active",run_id}` and
+  cancels nothing. Queued prompts survive every terminal reason.
+
+  Every daemon-created envelope has a fresh outer ULID `id` and timestamp;
+  prompt_id supplies acknowledgement correlation. `type` accepts any
+  non-blank string. The required payload validation above applies to known
+  M1 behavior types. Reserved names and all other unknown types retain
+  arbitrary JSON payloads and pass outer-envelope validation; an endpoint
+  with a forward target forwards them unchanged, and an M1 daemon with none
+  ignores them without emitting the not-implemented error. A-013 malformed-
+  frame handling remains unchanged. [folded from A-016]
+
+  In M1, daemon-authored `thread.snapshot.messages` use these minimum JSON
+  objects. A user message is `{message_id,run_id,role:"user",content,state}`
+  where `message_id` is the run's prompt_id, both IDs are ULIDs, content is
+  a string, and state is one of `queued`, `running`, `end_turn`,
+  `cancelled`, `error`, or `budget_exceeded`. An assistant message is
+  `{message_id,run_id,role:"assistant",content,thinking,events,partial}`
+  where `message_id` equals `run_id`, both are ULIDs, content and thinking
+  are strings, events is an array of JSON objects, and partial is boolean.
+  Additional JSON members are allowed and ignored by clients that do not
+  understand them. A matching snapshot replaces the browser's transcript,
+  open gate, active run, and usage for that thread; it is never merged with
+  cached messages or prior deltas.
+
+  The M1 browser owns a per-browser navigation catalog of
+  `{thread_id,title,created_at,updated_at}` in local storage. `thread_id` is
+  a browser-generated UUID, timestamps are ISO 8601 strings, and title is
+  `New thread` until the first submitted prompt, then the first 48 Unicode
+  code points of that prompt after collapsing whitespace, with `…` appended
+  exactly when the normalized prompt exceeds 48 code points. `created_at`
+  is fixed at catalog insertion; `updated_at` changes on each prompt submit.
+  Creating or selecting a catalog entry sends a `thread.snapshot` request
+  with payload `{request:true}` for that UUID; the first prompt creates
+  daemon state through the existing prompt.submit path. The catalog is only
+  local navigation metadata: snapshot remains transcript authority, the
+  daemon provides no M1 thread enumeration or persistence, and
+  `thread.create` gains no M1 behavior.
+
+  A browser-authored direct-link envelope uses the literal machine_id
+  `direct` until it has observed a daemon envelope, then echoes the latest
+  non-blank daemon machine_id. The M1 direct daemon does not consult this
+  field for identity or authority; future relay targeting supersedes the
+  direct-link sentinel. Every browser-authored envelope still receives a
+  fresh ULID and timestamp.
+
+  When bounded live delivery or a connection outbox drops a subscriber, the
+  daemon closes that WebSocket with code 1013 and reason
+  `snapshot resync required`. The browser reconnects, requests its selected
+  thread snapshot, and replaces local thread state before consuming later
+  live events; it does not poll or replay buffered deltas.
+  [folded from A-017]
 
 ## C.8 M1 acceptance criteria
 

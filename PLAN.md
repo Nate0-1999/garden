@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v1.15. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v2.0. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -228,7 +228,7 @@ before the relay continues.
   never → bias → quarantine at 3; "wrong" returns unit; exact final_block
   renderer; stats updates. Nodes: P1.2.1a–d. (Deps: S3, S5 — S5 first:
   S4's wrong_removed serializes MemoryUnit, which now carries origin_path.)
-- **S5 — origin_path metadata.** Sections: C.2, C.4 (v1.6 surfaces),
+- **S5 — origin_path metadata.** Sections: C.2, C.4 (as amended),
   ADR-005 location-relevance note. Deliver: migration 0002 adding
   origin_path; create/PATCH/MemoryUnit surfaces carrying it; scoring
   UNTOUCHED (inert metadata — scorer v0 neither reads it nor may any later
@@ -287,7 +287,7 @@ before the relay continues.
   single adapter module; ship it as a pydantic-ai v2 Capability subclass;
   nothing outside the adapter imports pydantic-ai capability machinery.
   Nodes: P1.2, P1.4. (Deps: H2.)
-- **H4 — Web shell + chat.** Sections: C.1 web/, C.7 (v1.12), ADR-009
+- **H4 — Web shell + chat.** Sections: C.1 web/, C.7 (as amended), ADR-009
   mobile law, B.6 rule 7. Deliver: responsive SPA — thread list, chat pane,
   run.delta streaming; sane at 390px. Verification per B.6 rule 7: drive
   the real UI with browser automation as a user would; screenshots of every
@@ -303,7 +303,7 @@ before the relay continues.
   re-render next call; edit flow with CAS conflict surfacing; manual pin
   toggle. Verification per B.6 rule 7 (browser-driven, screenshot
   evidence). Nodes: P1.2.1d, P1.3. (Deps: H5.)
-- **H7 — Envelope v1.12 & loop controls.** Sections: C.7 (v1.12), ADR-014
+- **H7 — Envelope v1.12 & loop controls.** Sections: C.7 (as amended), ADR-014
   (M1 subset). Deliver: daemon behavior + envelope models for run.started,
   run.cancel (confirmed abort, work preserved), prompt.queued
   (queue-to-turn-boundary), thread.snapshot (hydration on (re)connect),
@@ -333,7 +333,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v1.15): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v2.0): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or

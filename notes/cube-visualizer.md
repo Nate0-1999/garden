@@ -1,4 +1,8 @@
-# The Cube — unified work visualizer (design notes, pending approval)
+# The Cube — unified work visualizer (design notes)
+
+> STATUS 2026-07-20: codified into SPEC v2.0 (ADR-018, with ADR-016/017)
+> and NATES_VISION.md. This file remains the working sketchbook; where law
+> and sketchbook differ, law wins.
 
 Status: CONCEPT — mock built for human approval 2026-07-20; not yet law.
 Owner: human + assistant. Relay agents: read-only context, build nothing

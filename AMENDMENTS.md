@@ -398,3 +398,32 @@ law: In M1, daemon-authored `thread.snapshot.messages` use these minimum JSON
 why: This supplies only the render and navigation facts H4 already requires,
      formalizes H7's existing snapshot rows, and avoids inventing server-side
      thread storage, a title model call, sessions, or an authority boundary.
+
+---
+[FOLD MARKER 2026-07-20 — human gate, SPEC v2.0] A-001 through A-017 are
+folded verbatim into SPEC Part C (each site carries a "[folded from
+A-0NN]" marker). This file remains the append-only historical record and
+the FIRST home of every future completion: agents keep enacting here;
+folds into the spec happen only at human-gate editor passes. Numbering
+continues at A-018.
+
+[A-018] [H4] [SPEC C.7 thread.snapshot] [P2, P3]
+gap: A-017 makes each matching snapshot a wholesale browser-state replacement,
+     but H7 may send both its automatic attach snapshot and the browser's
+     requested snapshot. A successfully sent prompt between those responses
+     can otherwise lose its only local text before run.started or
+     prompt.queued supplies correlation.
+law: The M1 browser keeps every successfully sent but unacknowledged
+     prompt.submit in a volatile outbox keyed by thread_id and prompt_id, with
+     its prompt text. This outbox is separate from the authoritative
+     transcript and is not persisted. A matching thread.snapshot still
+     replaces the transcript, open gate, active run, and usage wholesale. For
+     display only, the browser projects an outbox item whose prompt_id is
+     absent from the replacement transcript as one submitting user row.
+     run.started or prompt.queued updates an existing matching user row or
+     materializes it from the outbox, then removes that item. A snapshot that
+     already contains the prompt also removes its outbox item. Reload recovery
+     remains snapshot-only; the browser never resubmits an outbox item.
+why: This preserves A-017 snapshot authority while preventing an overlapping
+     pre-ack snapshot from erasing the only copy of an accepted prompt. It adds
+     no replay, persistence, server correlation field, or new behavior family.
