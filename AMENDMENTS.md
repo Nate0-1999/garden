@@ -259,3 +259,12 @@ law: After C.7's M1 type list, add: "Each browser-to-daemon message occupies
      further processing on that connection."
 why: This makes H1's existing rejection requirement observable and closes the
      binary-frame crash without defining any per-type payload or business flow.
+
+[A-014] [H2] [SPEC C.4 POST /v1/inject/prepare] [P1.1]
+gap: C.4 names `model_context_tokens` but does not define its valid domain even
+     though the implemented prepare budget requires it to be positive.
+law: After POST `/v1/inject/prepare`'s request body, add: "Require
+     `model_context_tokens > 0`; a violation returns RFC7807 422 before
+     embedding or any database write."
+why: This makes the existing implemented/OpenAPI boundary explicit without
+     changing prepare behavior, its budget formula, or any completed packet.
