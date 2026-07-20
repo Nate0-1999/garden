@@ -231,3 +231,18 @@ law: After C.6's rendered block template, add: "Join structural lines with LF,
      the template, and `</memory_system>`."
 why: Deterministic safe serialization completes the already-fixed XML-shaped
      wire block without adding a field, renderer option, or new behavior family.
+
+[A-012] [S6] [SPEC C.4 POST /v1/search] [P1.1]
+gap: C.4 supplies `k=10` and optional `project_key`, while the S6 charge promises
+     top-k cosine search, but neither bounds k nor defines omitted-versus-null
+     project behavior or the equal-cosine cutoff order.
+law: After POST `/v1/search`, add: "Require `1 <= k <= 50`; a violation returns
+     RFC7807 422 before embedding. An omitted or JSON-null `project_key` applies
+     no project filter. A non-null `project_key` admits only ACTIVE units whose
+     `project_key` is NULL or exactly equal to the request value. Results are the
+     first k ordered by raw cosine similarity DESC then `memory_id` ASC. Search
+     applies no scorer threshold, weights, bias, pin priority, or candidate
+     re-ranking; `score` is that raw cosine and `features` / `rank` are null."
+why: This completes the existing field, filter, and result contract using C.3's
+     M1 pool bound and the established cosine/UUID tie convention, without
+     adding a search signal or scorer behavior.
