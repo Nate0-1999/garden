@@ -13,7 +13,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | S5 | origin_path metadata           | S3                                | DONE        | codex / 2026-07-19 / e5a7    |         |
 | S6 | /v1/search                     | S2                                | DONE        | codex / 2026-07-19 / f6a2    |         |
 | D1 | GCP deploy gate (HUMAN)        | S4, S7                            | IN_PROGRESS | human+claude / 2026-07-19    |         |
-| S7 | Broker-routed embeddings       | S2                                | IN_PROGRESS | codex / 2026-07-20 / c105    |         |
+| S7 | Broker-routed embeddings       | S2                                | DONE        | codex / 2026-07-20 / c105    |         |
 | D2 | Billing circuit breaker        | P0                                | DONE        | codex / 2026-07-19 / b61b    |         |
 | H1 | Envelope + daemon WS           | P0                                | DONE        | codex / 2026-07-20 / 25ff    |         |
 | H2 | spine_client + contract tests  | S2                                | DONE        | codex / 2026-07-20 / db84    |         |
