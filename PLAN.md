@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v1.5. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v1.6. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -207,7 +207,14 @@ before the relay continues.
 - **S4 — Commit, feedback, quarantine.** Sections: C.4 (commit, feedback),
   C.3 (never rule), C.6 (final_block format). Deliver: outcome writes;
   never → bias → quarantine at 3; "wrong" returns unit; exact final_block
-  renderer; stats updates. Nodes: P1.2.1a–d.
+  renderer; stats updates. Nodes: P1.2.1a–d. (Deps: S3, S5 — S5 first:
+  S4's wrong_removed serializes MemoryUnit, which now carries origin_path.)
+- **S5 — origin_path metadata.** Sections: C.2, C.4 (v1.6 surfaces),
+  ADR-005 location-relevance note. Deliver: migration 0002 adding
+  origin_path; create/PATCH/MemoryUnit surfaces carrying it; scoring
+  UNTOUCHED (inert metadata — scorer v0 neither reads it nor may any later
+  scorer penalize its absence, per the null rule); tests. Nodes: P1.3.
+  (Deps: S3.)
 
 **Cloud gate**
 - **D1 — GCP deploy & remote verification (HUMAN — agents never claim).**
@@ -265,7 +272,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v1.5): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v1.6): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or
