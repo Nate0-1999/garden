@@ -12,7 +12,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | S4 | Commit, feedback, quarantine   | S3, S5                            | DONE        | codex / 2026-07-19 / a4c9    |         |
 | S5 | origin_path metadata           | S3                                | DONE        | codex / 2026-07-19 / e5a7    |         |
 | S6 | /v1/search                     | S2                                | TODO        |                              |         |
-| D1 | GCP deploy gate (HUMAN)        | S4                                | TODO        |                              |         |
+| D1 | GCP deploy gate (HUMAN)        | S4                                | IN_PROGRESS | human+claude / 2026-07-19    |         |
 | H1 | Envelope + daemon WS           | P0                                | TODO        |                              |         |
 | H2 | spine_client + contract tests  | S2                                | TODO        |                              |         |
 | H3 | Agent + memory tools           | H2, S6                            | TODO        |                              |         |

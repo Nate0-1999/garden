@@ -20,15 +20,21 @@ Amending the master is a human act — agents propose via FLAGS, or enact
 qualifying COMPLETIONS via AMENDMENTS.md (Section 2), and never edit
 SPEC.md themselves.
 
-**Cloud footprint (D1, 2026-07-19):** GCP project `n8-memory-palace`
-(us-central1), Cloud SQL `n8-memory-palace-db` (Postgres 16 + pgvector,
-db-f1-micro), Cloud Run service `n8-memory-palace-spine` — deployed URL in
-the D1 board claim. $100/month budget with 50/90/100% alerts. Secrets live
+**Cloud footprint (D1; state as of 2026-07-19):** GCP project
+`n8-memory-palace` (us-central1) is LIVE with a $100/month budget alerting
+at 50/90/100% (alerts, not a hard stop — an auto-shutoff function is a
+possible follow-up). Cloud SQL `n8-memory-palace-db` (Postgres 16,
+db-f1-micro) is created; pgvector arrives with migration 0001. Secrets live
 ONLY in `harness/.env` (untracked; `.env.example` is the shape): SPINE_TOKEN
-(shared with the Cloud Run service), OPENAI (embeddings), OPENROUTER (chat;
-dev/test default model per SPEC C.5). Local `docker compose` remains the
-C.8 acceptance path; the cloud spine is the always-on heart. Migrations run
-from a workstation via cloud-sql-proxy, never at container boot.
+(generated), OPENROUTER (verified live, minimax-m3 dev default per C.5),
+OPENAI for embeddings (key valid but account quota EXHAUSTED — the human
+must add credits before D1's verification step). REMAINING for D1, human
+only: create spine db/user; run Alembic through cloud-sql-proxy; deploy
+Cloud Run service `n8-memory-palace-spine` from the spine Dockerfile
+(migrations never run at container boot); verify /healthz plus a
+real-embed create → dedup → prepare → commit round trip; record the URL in
+the D1 claim and set DONE. Local `docker compose` remains the C.8
+acceptance path; the cloud spine is the always-on heart.
 
 ---
 
