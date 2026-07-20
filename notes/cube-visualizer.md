@@ -152,3 +152,46 @@ query surface accepts `as_of` (timestamp/checkpoint ref), so any face can
 render any moment. The scrubber, time-lapse, and live view are then one
 mechanism at three speeds — and the scrubber composes with rewind/fork:
 scrub to a moment, fork from it (ADR-016 tree).
+
+## v6: rendering stack + extensibility architecture (2026-07-20)
+
+STACK (amends ADR-008's PROPOSED details; H4/M1 chat shell unaffected):
+- Split at the physics boundary: ONE WebGL/WebGPU stage scene for the Cube
+  (three.js + react-three-fiber inside the existing React+Vite app; TSL
+  shaders dual-target WGSL/GLSL so WebGPU runs where available, WebGL
+  falls back automatically); React DOM for all rails/panels/text. Text
+  never enters the canvas — HUD labels are DOM overlays.
+- Scale: instanced meshes (ants, cells, root segments), compute shaders
+  for living systems (curator swarms, root growth). Discipline: refs +
+  useFrame, never per-frame setState.
+- One shared store (zustand): the event-stream reducer + selection bus +
+  query cache. Stage, rails, and every plugin are subscribers — the store
+  IS the plugin three-surface contract materialized.
+- Client state is event-sourced with keyframe snapshots (IndexedDB):
+  time-scrub = nearest keyframe + re-reduce; client twin of `as_of`.
+- Accessibility: every stage view keeps a parallel DOM/table rendering;
+  keyboard paths exercised by B.6 rule 7 tests.
+
+RUNTIME TARGET:
+- Chromium-class browsers ONLY through M4 (Chrome app mode `--app=` for
+  desktop feel, PWA install at M3 — both already law in ADR-008/009).
+  Single-user product: no Safari/Firefox compat tax for relay agents;
+  revisit at multi-principal. Chromium gives WebGPU-first, FS Access API,
+  OffscreenCanvas, import maps.
+
+PLUGIN ARCHITECTURE (Ableton doctrine made concrete):
+- Plugins are ES MODULES with a manifest (name, version, slots, entry);
+  loaded via dynamic import()/import maps — no bundler at runtime. The
+  harness daemon serves user plugins from a local plugins/ dir alongside
+  web/ (later: a directory/marketplace).
+- Two trust tiers:
+  (1) PANEL plugins (rails/console/card renderers): sandboxed IFRAMES,
+      postMessage bridge carrying ONLY the three surfaces (events, query,
+      selection). Strong isolation; a broken/hostile plugin owns nothing
+      but its rectangle. No notify API exists — Invariant 14 structurally.
+  (2) FACE plugins (stage): cannot iframe into the scene, so faces are
+      DATA-DRIVEN — a declarative scene schema (nodes/edges/instances/
+      curves/encodings) interpreted by our renderer; plugins emit data,
+      never touch three.js. Keeps the contract and the render loop ours.
+- Plugin API is VERSIONED (surfaces v1); upstream/ecosystem churn is
+  contained exactly like ADR-013 wraps pydantic-ai.
