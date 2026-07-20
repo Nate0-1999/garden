@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v2.1. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v2.2. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -333,7 +333,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v2.1): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v2.2): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or

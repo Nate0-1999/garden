@@ -107,22 +107,46 @@ time-ordered, auto-advance by wait), LEDGER (capital alluvial), PALACE
   Invariant 14 is structural. Panel plugins = sandboxed iframes; face
   plugins = data-driven scene schemas (never raw renderer access).
 
-## 8. Aesthetics (reference-image law, iterated to)
+## 8. Aesthetics — THEMES, swappable; NEO-NOIR is the default
 
-90s cel-anime, X-wing-pilot-display HUD, chrome seraph energy. Current
-direction after refinement: grounds near-BLACK with starfield; linework
-WHITE/steel, cel-crisp 1.5–2px, minimal glow; accents ORANGE (#d97a3a
-family — less yellow); chrome gradient reserved for peak moments (FIRE,
-premieres); coral-red #e6404d is the only danger color; 4-point star
-glints, whisper scanlines. The Palace minimap runs INVERTED (light misty
-ground, dark monumental slabs, orange ghost-drone curators). Full Palace
-scene (future centerpiece): abstract modern architecture in void-mist,
-Destiny Trials-of-the-Nine ENERGY and Ghost-INSPIRED curator drones —
-original designs, never copied assets — restructuring memory live from
-event feeds. Fonts: display = Michroma / Eurostile-Bold-Extended-alike;
-body = Inter; data = JetBrains Mono (all self-hosted). Fleet palette is
-machine-validated (dataviz six checks) on final grounds — REVALIDATE
-whenever grounds change. Needles for rates, digits for counts.
+The aesthetic is a THEME: a loadable style configuration (tokens, motif
+set, material language) in the Ableton rack — easily swapped, easily
+authored, like everything else on the rack. Two named themes exist at
+birth; users add their own.
+
+**THEME: NEO-NOIR (DEFAULT).** The owner's voice, verbatim from his own
+generator config — these phrases are the design language, not literal
+config: *"neo-noir, Syd Mead inspired · Blade Runner aesthetic · neon
+colors against dark urban backgrounds · neon blues and reds · street
+level views, claustrophobic spaces · urban dystopia."* Visual elements:
+*"neon lights, corporate architecture, street tech, digital interfaces,
+holographic displays, rain-slicked surfaces, urban decay, volumetric
+lighting."* Emphasize gritty detail and technological elements. Feel
+reference: *"cluttered cyberpunk workspace, multiple floating holographic
+screens, neon lighting, rain-streaked window, corporate towers visible
+outside, tech noir."* Applied to the Cube: panels read as street tech and
+holographic displays; the stage swims in volumetric neon against dark;
+reflective/rain-slicked material treatments on the procedural parts;
+tone street-wise, pacing quick and sharp; if sound ever ships, synthetic
+and industrial.
+
+**THEME: COBALT-SERAPH (alternate).** The 90s cel-anime chrome world
+distilled earlier: near-black grounds + starfield, white/steel cel-crisp
+linework, orange accents (#d97a3a family), chrome gradient for peak
+moments, coral-red #e6404d danger, 4-point glints, whisper scanlines,
+inverted light Palace minimap. The current mock wears this theme.
+
+**THEME-INDEPENDENT INVARIANTS (no theme may break these):** themes STYLE
+meaning, never re-encode it — data encodings (thickness=spend, fleet
+identity colors, needles-for-rates/digits-for-counts) survive every
+theme; each theme's fleet palette is machine-validated (dataviz six
+checks) on that theme's grounds before shipping; exactly one danger
+color per theme; Invariant 14 is not a style. Palace scene direction
+(pale monumental architecture, ghost-drone curators — original designs,
+never copied assets) persists across themes as the Palace's own identity.
+Fonts: display = Michroma / Eurostile-Bold-Extended-alike; body = Inter;
+data = JetBrains Mono (self-hosted; themes may override with the same
+self-host rule).
 
 ## 9. Stack & runtime (per stack discussion)
 
