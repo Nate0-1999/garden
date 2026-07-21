@@ -1,6 +1,6 @@
 # The Garden Plan — loop-enabled M1 execution
 
-Companion to docs/SPEC.md v2.3. This is OPERATIONS, not constitution: it may
+Companion to docs/SPEC.md v2.4. This is OPERATIONS, not constitution: it may
 change freely; the spec may not. This document is written to be executed by a
 relay of agents, generation 0 through n, each arriving with no memory of the
 last. Everything an agent needs is in files; nothing lives in anyone's head.
@@ -333,6 +333,16 @@ before the relay continues.
   Nodes: P4. (Deps: P0.)
 
 **Harness track**
+- **D3 — The deploy & onboarding command (packaging wave).** Sections:
+  ADR-019, ADR-013. Deliver: `nocturne` CLI (init/up/deploy/open) per the
+  two-secrets rule; both wheels with bundled web assets and packaged
+  migrations; `nocturne deploy` = the executed D1 runbook as idempotent
+  code with --dry-run, honoring D.2 045's boundaries (no deletes, no
+  broad IAM; the D2 breaker step prompts for HUMAN confirmation);
+  quickstart README. Verification per ADR-019's clause: fresh machine +
+  Docker + one OpenRouter key → working browser chat. Nodes: P4.
+  (Deps: J — packaging opens after the judge; C.8 stays repo-based.)
+
 - **H1 — Envelope + daemon WS.** Sections: C.7, C.1. Deliver: envelope
   models, WS server, type routing, malformed-envelope rejection tests.
   Nodes: P3. (Eligible after P0.)
@@ -393,7 +403,7 @@ before the relay continues.
 # Ground rules (read every session)
 1. You are one runner in a relay governed by ../garden/PLAN.md — run its
    Boot Sequence before anything else.
-2. The constitution is docs/SPEC.md (v2.3): sections 1 -> 2 -> B -> C; read
+2. The constitution is docs/SPEC.md (v2.4): sections 1 -> 2 -> B -> C; read
    fully the sections your packet names.
 3. You are in Milestone M1 unless your charge says otherwise. Feature
    ledger (SPEC B.4) applies: FORBIDDEN means do not build, stub, or

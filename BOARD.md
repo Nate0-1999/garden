@@ -22,6 +22,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | H5 | The gate                       | D1, H4                            | IN_PROGRESS | codex / 2026-07-21 / a5e1    |         |
 | H6 | Memory panel                   | H5                                | TODO        |                              |         |
 | H7 | Envelope v1.12 & loop controls | H1                                | DONE        | codex / 2026-07-20 / 9d2f    |         |
+| D3 | Deploy & onboarding command    | J                                 | TODO        |                              |         |
 | I1 | Integration & AC dry run       | S1-S6, H1-H6                      | TODO        |                              |         |
 | J  | Judge                          | I1                                | TODO        |                              |         |
 

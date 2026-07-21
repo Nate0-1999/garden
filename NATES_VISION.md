@@ -188,3 +188,14 @@ the Palace from its memory populations. Deterministic (same data, same
 geometry) so the rollback bar can regrow any moment. Nothing hand-modeled
 ever enters the stage: an asset that isn't generated from truth is a
 picture of the organism, not the organism.
+
+## 13. Nocturne, and palaces shared (added 2026-07-20)
+
+The product is NOCTURNE — night music: it plays through the night so the
+composer hears the premiere in the morning. Onboarding is part of the
+instrument: at most two secrets (one, locally), four commands, no clones —
+setup attention is still attention. And the remembering orchestra scales
+to sections: teammates each CHOOSE memories to contribute into a shared
+Palace — consent-based, lineage-tracked, revocable, never automatic —
+so a project can have a memory greater than any one of its people,
+without anyone surrendering their own.
