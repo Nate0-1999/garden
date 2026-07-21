@@ -12,7 +12,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | S4 | Commit, feedback, quarantine   | S3, S5                            | DONE        | codex / 2026-07-19 / a4c9    |         |
 | S5 | origin_path metadata           | S3                                | DONE        | codex / 2026-07-19 / e5a7    |         |
 | S6 | /v1/search                     | S2                                | DONE        | codex / 2026-07-19 / f6a2    |         |
-| D1 | GCP deploy & remote verify     | S4, S7                            | TODO        |                              | edge 404; report 016 |
+| D1 | GCP deploy & remote verify     | S4, S7                            | IN_PROGRESS | codex / 2026-07-20 / b82e    | edge 404; report 016 |
 | S7 | Broker-routed embeddings       | S2                                | DONE        | codex / 2026-07-20 / c105    |         |
 | D2 | Billing circuit breaker        | P0                                | DONE        | codex / 2026-07-19 / b61b    |         |
 | H1 | Envelope + daemon WS           | P0                                | DONE        | codex / 2026-07-20 / 25ff    |         |
