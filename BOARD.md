@@ -15,6 +15,7 @@ deterministic packet order when more than one dependency-ready packet exists.
 | D1 | GCP deploy & remote verify     | S4, S7                            | DONE        | codex / 2026-07-20 / b82e    | report 017 |
 | S7 | Broker-routed embeddings       | S2                                | DONE        | codex / 2026-07-20 / c105    |         |
 | D2 | Billing circuit breaker        | P0                                | DONE        | codex / 2026-07-19 / b61b    |         |
+| D4 | Practical breaker preflight    | P0                                | TODO        |                              |         |
 | H1 | Envelope + daemon WS           | P0                                | DONE        | codex / 2026-07-20 / 25ff    |         |
 | H2 | spine_client + contract tests  | S2                                | DONE        | codex / 2026-07-20 / db84    |         |
 | H3 | Agent + memory tools           | H2, S6                            | DONE        | codex / 2026-07-20 / 7c3a    |         |

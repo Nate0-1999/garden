@@ -332,6 +332,24 @@ before the relay continues.
   (private preview 2026; covers Cloud Run but NOT Cloud SQL) reaches GA.
   Nodes: P4. (Deps: P0.)
 
+- **D4 — Practical breaker preflight (build: agent; deploy: HUMAN).**
+  Sections: report 018, infra/billing-breaker/deployment_checks.py +
+  deploy.sh + tests. Problem: D2's preflight refuses to arm against a
+  DEFAULT GCP project — it hard-rejects Google's own default identities
+  (Container Registry service agent, default Compute Engine SA with
+  roles/editor) that hold pubsub.topics.publish in essentially every
+  project, making the breaker undeployable without project-wide IAM
+  surgery. Deliver: KEEP every resource-level check (topic publish policy
+  = Google budget alerter only; function private + no-retry; exact
+  detach-role binding; budget BILLING_ACCOUNT-scoped $100 monthly
+  project-filtered; trusted deployer via the casefold fix). DEMOTE the
+  project-wide principal audit from a hard refusal to an informational
+  WARNING that lists broad/default publishers without blocking. Tests: a
+  default-posture project passes preflight; tampering with the
+  topic/function/detach role still refuses; the warning enumerates the
+  broad identities. Pure offline Python + tests — no cloud mutation; the
+  destructive --apply stays human-only. Nodes: P4. (Deps: P0.)
+
 **Harness track**
 - **D3 — The deploy & onboarding command (packaging wave).** Sections:
   ADR-019, ADR-013. Deliver: `nocturne` CLI (init/up/deploy/open) per the
