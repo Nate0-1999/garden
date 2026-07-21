@@ -47,11 +47,16 @@ decision:          Owner chose to SIMPLIFY the preflight rather than harden the
 notes (resolved):  The fix (spine 335539f) kept every RESOURCE-level check (topic
                    publish policy = Google budget alerter only; function
                    private + no-retry; exact detach-role binding; budget shape;
-                   trusted deployer via the 2233df2 casefold). DEMOTE the
-                   project-wide principal audit (validate_role_access over
-                   pubsub/billing publishers) from a hard refusal to an
-                   informational WARNING that lists broad/default identities
-                   but does not block. Add tests: a default-posture project
-                   (containerregistry agent + default compute Editor SA
-                   present) PASSES; tampering with the topic/function/detach
-                   role still REFUSES. Destructive --apply stays human-only.
+                   trusted deployer via the 2233df2 casefold) AND the strict
+                   billing-account IAM audit. The project-IAM audit was narrowed,
+                   not demoted: it now recognizes Google's default identities and
+                   trusts Google project service agents for every dangerous perm
+                   except direct billing ASSOCIATION (project-level detach, which
+                   only the runtime binding may hold), because the
+                   BILLING_ACCOUNT-scoped budget makes project-level billing
+                   permissions inert. It still hard-refuses genuine anomalies:
+                   any user, group, or user-created service account (its own
+                   `<project-id>` SA domain) with breaker-relevant permissions.
+                   Tests added: default identities PASS, attacker-project SA and
+                   project-level detach still REFUSE (76 D2 + 160 spine green).
+                   Destructive --apply stays human-only.
