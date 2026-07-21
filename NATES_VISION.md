@@ -82,7 +82,7 @@ directory tree as chambered burrows, files as cells, zoomable, floating
 CAD-like on a black field with faint grid); ROOTS is the depth axis
 (organic MEANDERING roots growing horizontally out of each colony; dead
 roots desiccated and preserved; thickness = tokens spent; expected value
-encoding pending OQ-C3 — opacity floor 0.25 minimum); TIPS is the
+= selection focus: selected score full, others dimmed but present (floor 0.25); EV is not an alpha channel (OQ-17 resolved)); TIPS is the
 opposite face (roots end-on: per-project grids of starts for the next
 round). ORBIT rotates AROUND (rotateY-style), plus face rotation; scroll
 zooms. Other faces: DECK (the ONLY demanding surface — left rail,
