@@ -60,3 +60,17 @@ notes (resolved):  The fix (spine 335539f) kept every RESOURCE-level check (topi
                    Tests added: default identities PASS, attacker-project SA and
                    project-level detach still REFUSE (76 D2 + 160 spine green).
                    Destructive --apply stays human-only.
+
+follow-up (2026-07-21 arm attempt):  --apply built every resource (topic, 3
+                   isolated SAs, private no-retry function, invoker + publisher
+                   bindings) then failed the FINAL project-IAM audit on a FOURTH
+                   Google default — the App Engine SA `@appspot`, which the
+                   function deploy itself CREATES (so no pre-flight could catch
+                   it). Recognized it too (spine 26942c4; the compute + appspot
+                   pair are the complete broad-Editor defaults). The partial
+                   deploy was cleaned per the README procedure — function, topic,
+                   run service, 3 SAs all deleted and proven absent; the detach
+                   role was never granted (never armed); the budget was never
+                   wired. A live simulation of the final audit against current
+                   IAM (now including the appspot SA) is CLEAN. Human re-runs the
+                   unchanged --apply.
