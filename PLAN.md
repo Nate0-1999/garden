@@ -384,9 +384,13 @@ before the relay continues.
   styling; NO raw HTML passthrough — render as text; theme-token
   styled); user messages stay plain text; (2) the ACTIVE MODEL visible
   in the thread header/top bar (read from config; per-thread selector
-  remains M2). Verification per B.6 rules 7+8 including a rendering
-  screenshot of a markdown-heavy reply (table + code block) at desktop
-  and 390px, and an SOP step confirming raw-HTML input renders inert.
+  remains M2); (3) KEYWORDS MANDATE (SPEC v2.7, D.2 050): update the C.6
+  agent-instruction string (2-5 keywords per save) and make /remember
+  generate label AND keywords in its one short completion. Verification
+  per B.6 rules 7+8 including a rendering screenshot of a markdown-heavy
+  reply (table + code block) at desktop and 390px, an SOP step confirming
+  raw-HTML input renders inert, and a scripted check that a /remember
+  memory lands with non-empty keywords.
   Nodes: P2, P3. (Deps: H5. Claimable once the human-use hold clears;
   H6 precedes by board order.)
 
