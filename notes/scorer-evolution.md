@@ -163,3 +163,67 @@ Tool/skill parity (browser use via Codex extension port, Agent Skills,
 MCP, CodeMode, etc. — see gate-day-feedback.md): owner wants a dedicated
 detailed session; plan a focused field survey + adoption charges when it
 opens.
+
+## Live Palace audit + v0.2 proposal review (2026-07-22)
+
+DATA FINDINGS (direct DB inspection via proxy):
+- Empty axes diagnosis: /remember memories carry NO keywords/project/path
+  (M1 shell has no project/location concept — by design; movement law
+  (M3, CONTRACT) populates path/proj automatically). The agent-saved
+  memory ('Project motivation: SQL/ETL…', editor=agent:harness-agent)
+  ALSO carried kw=[] — the save_memory keywords param is optional and the
+  agent skipped it. ACTIONABLE: C.6 agent instructions should mandate 2–5
+  keywords per save; /remember could generate keywords in the same
+  completion that generates the label. Keyword-less memories are
+  handicapped on f_kw (label tokens only).
+- THE f_gen SMOKING GUN: the owner's 'Motivation as root context' reached
+  the gate as near-miss rank 1 with sem≈0.05, kw=0 — semantically almost
+  INVISIBLE to the ETL prompt — yet the owner added it back. This is a
+  perfect real-data justification for the generality axis: universal
+  memories are exactly the ones embeddings can't see. Training row one
+  argues for f_gen all by itself.
+- TRAINING-DATA HYGIENE (new rule needed): H5 verification fixtures wrote
+  ~25 events under machine 'h5-verification-machine' / editors
+  'verification:h5'. The Chrysopoeia MUST exclude verification/test
+  machine ids and editor prefixes from learning data, or fixture clicks
+  will tune the scorer. Add a hygiene filter spec to M2 learning law.
+- Minor: D1 verification left one active project-scoped memory
+  ('D1 broker 4f6500c7') in the production Palace — mostly inert (scoped
+  to a synthetic project) but candidate for tombstone hygiene.
+
+V0.2 PROPOSAL REVIEW (agent-polished; owner asked for incremental ideas):
+Already ours (no action): budget %/cap+pins, path priors (our continuous
+2^(−d/2) beats its discrete ladder), retrieval_log (injection_event is
+richer), user/project prior (M3 offsets), reuse-success (f_freq+outcomes),
+LLM merge consolidation (curators M3), demote/expire (quarantine,
+staleness), compaction→durable candidates (M2 extraction), "mark this
+remembered" (/remember+pin). REJECTED: post-session questionnaire tuning
+(Invariant 14 — our gate signals collect the same information passively);
+SQLite local-first (cloud law); mandatory-question compaction (parked
+plan-mode already covers the idea gently).
+ADOPT-LIST (incremental, real):
+1. HYBRID RETRIEVAL (strong; M2 packet candidate): candidate pool is
+   vector-only top-50 today — an exact-keyword memory with weak embedding
+   can never surface. Union Postgres FTS (tsvector) with the vector pool;
+   scorer ranks the union. v0.2's "single search mode misses too much" is
+   correct, and the owner's sem≈0.05 near-miss is adjacent evidence.
+2. CONTRADICT/SUPERSEDE taxonomy (moderate-strong; M3 curators): extend
+   write/consolidation decisions beyond duplicate/similar to
+   merge | new | contradict | supersede, with supersession recorded (see
+   3). Contradiction detection protects truth over time.
+3. TYPED EDGE OVERLAY (moderate; M3): typed edges (supersedes,
+   contradicts, relates-to) as rows in the same DB — 1-hop expansion and
+   consolidation aid, never first-pass retrieval. Refines the original
+   'searchable graph' idea to overlay-not-architecture.
+4. PROMOTION ≠ RAW FREQUENCY (good; M3 law refinement): pin-promotion
+   should blend stability + importance + reuse + manual signal ("frequency
+   alone promotes nonsense").
+5. CANDIDATE STATUS (small; M2): a formal 'candidate' memory status for
+   approval-queue items (extraction + seed ingestion) instead of
+   overloading active.
+6. ENTITY + IMPORTANCE/STABILITY AXES (agentic-axes candidates): entity
+   tags (files/modules/concepts) and declared importance — enter through
+   the replay-gated feature pipeline alongside f_gen/f_phase.
+7. "OPEN LOOPS" compaction output (nice; M3): compaction emits working
+   summary + open loops + durable candidates — open loops is a genuinely
+   useful third artifact.
