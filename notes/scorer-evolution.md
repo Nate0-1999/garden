@@ -66,6 +66,54 @@ live rollout. Not overfit — schedule with OQ-15.
   makes replay-reconstruction an acceptance test. The owner's first
   add-back (2026-07-21) is training row one.
 
+## HORIZON candidate: agentic axes — the curator grows its own instruments
+
+Owner (2026-07-21): could the scorer's AXES themselves be added and
+relegated over time by the curators, optimizing injection performance?
+Analysis — YES, and the machinery is closer than it looks:
+- RELEGATION is already law: the null-rule pattern (omit a feature,
+  renormalize remaining weights) + scorer_config versioning retire an
+  axis without migration.
+- ADDITION and the owner's backfill worry ("can't create the new axis for
+  old memories without fake data"): the null rule is the answer — an old
+  memory that cannot express a new feature is OMITTED-and-renormalized,
+  never fake-zeroed. No fake data, ever. And features DERIVED from logged
+  history (empirical generality from cross-project outcomes; phase from
+  logged contexts; location from origin_path) can be backfilled HONESTLY
+  because every surface is append-only — we kept everything.
+- The search itself is ADR-017 ALREADY: curator feature-discovery is a
+  Symphony search where STRATAGEMS = candidate axes and the objective is
+  MEASURED — replay performance on the permanent injection log. The
+  Chrysopoeia growing its own instruments is stratagem search over
+  feature space.
+- Guardrails: a curator-proposed axis enters a scorer version ONLY after
+  beating the incumbent in offline replay; scorer_version keeps every
+  step auditable and rollbackable; human gate approves axis adoption in
+  early eras. Milestone: post-M3 (needs curator agents + replay tooling).
+
+## Owner directive: complete logs in perpetuity
+
+Keep COMPLETE logs of all conversations in perpetuity, until cost forces
+otherwise — full auditability + future training. Current honest state:
+memories, revisions, and the injection log (incl. full prompt_text) are
+already permanent and append-only; but M1 CONVERSATION TRANSCRIPTS are
+process-local in the daemon (A-016/A-017 — they die with the daemon
+process; the browser catalog is navigation metadata only). Directive for
+M2/M3 session persistence (ADR-016 tree + durable sessions): transcripts
+become durable, append-only, retained indefinitely with a cost-triggered
+archive path (e.g., GCS cold storage at M4) rather than deletion.
+
+## Capture status (owner asked)
+
+Design riffs land in the GARDEN (notes → law at gates) — the project's
+memory. The PALACE holds the product's memories via the owner's own
+/remember and gate actions. Deliberately two systems; meta-content is not
+backfilled into the Palace (would pollute injection). Symmetry worth
+savoring: ADR-019 clause 4 seed ingestion (M2) will let the owner upload
+these very notes as markdown and have curators split them into atomic
+memories — the Garden's knowledge can migrate into the Palace when the
+owner chooses, through the standard consent/approval pipeline.
+
 ## Queued deep-dive
 
 Tool/skill parity (browser use via Codex extension port, Agent Skills,
