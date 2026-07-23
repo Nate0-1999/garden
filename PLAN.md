@@ -417,7 +417,11 @@ before the relay continues.
   with browser automation for screenshots; produce
   `verification/m1/VERDICT.md`. Any FAIL → set FAILED_JUDGMENT on the
   packets the verdict implicates (or I1 if diffuse); a FIXER inherits the
-  verdict.
+  verdict. ADDITIONAL DUTY (owner, 2026-07-22): ADR STATUS NORMALIZATION —
+  propose (in the verdict, for the human gate to enact) status updates
+  aligning each ADR's Status line with built-and-verified reality (e.g.
+  ADR-004 PROPOSED though its unit/CAS law shipped in the S-packets);
+  COMPLETION authority per AMENDMENTS.md, evidence required per B.6.
 
 ## 6. CLAUDE.md / AGENTS.md template (both product repos)
 
