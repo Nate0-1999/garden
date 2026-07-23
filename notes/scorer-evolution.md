@@ -227,3 +227,17 @@ ADOPT-LIST (incremental, real):
 7. "OPEN LOOPS" compaction output (nice; M3): compaction emits working
    summary + open loops + durable candidates — open loops is a genuinely
    useful third artifact.
+
+## Lifecycle red-team residue (2026-07-22, post-ADR-021/v2.11)
+
+Enacted as v2.11 closures C1-C6. NOT enacted, parked here for M2 planning:
+- ATTENDED-THREAD SAMPLING BIAS: unattended conduct-mode threads generate
+  mostly passive 'kept' signal; chat threads generate rich labels. C5's
+  actor classes carry the fix's raw material — consider thread-attendance
+  as a context feature in replay before weighting classes.
+- STAGED CITATION STATS: citations of staged units accrue in staging and
+  fold in on promotion (die with archived branches) — implied by C1's
+  pattern; make explicit in the M3 staging migration spec.
+- JUDGE ATTENTION BOUNDS: judge memory-gate review is bounded by rate cap
+  × winning-branch depth; if big searches strain it, rank-and-truncate
+  with digest overflow rather than raising judge spend.
