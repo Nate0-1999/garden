@@ -241,3 +241,11 @@ Enacted as v2.11 closures C1-C6. NOT enacted, parked here for M2 planning:
 - JUDGE ATTENTION BOUNDS: judge memory-gate review is bounded by rate cap
   × winning-branch depth; if big searches strain it, rank-and-truncate
   with digest overflow rather than raising judge spend.
+
+## Horizon holes (unlawed, dormant — from the 2026-07-22 flow walkthrough)
+
+Deliberately without law until scale forces them; capture so they're never
+forgotten: (1) EMBEDDING-MODEL MIGRATION — re-embedding a large palace when
+the embedding model changes (embedding_model tag exists per-unit; the
+migration procedure doesn't); (2) ARCHIVAL TIERS at scale (hot/cold memory
+storage split); (3) PALACE EXPORT/PORTABILITY (leave-with-your-data law).
